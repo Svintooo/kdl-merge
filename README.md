@@ -4,7 +4,9 @@ Merge for KDL documents.
 ## What is this?
 This is my attempt to create support for merging KDL documents.
 
-KDL (a Cuddly Document Language): https://kdl.dev/
+KDL (a Cuddly Document Language):
+- https://kdl.dev/
+- https://github.com/kdl-org/kdl
 
 ## Status
 The project is in draft state.
