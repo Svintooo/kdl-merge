@@ -28,7 +28,7 @@ A CLI program with the following usage:
 ```
 USAGE: kdl-merge [-r RULEFILE] [-o NEWFILE] ORIGFILE MERGEFILE
 ```
-An original KDL document ORIGFILE is merged fith another KDL document MERGEFILE using the rules in a third KDL document RULEFILE. The merge result is written to NEWFILE.
+An original KDL document ORIGFILE is merged with another KDL document MERGEFILE using the rules in a third KDL document RULEFILE. The merge result is written to NEWFILE.
 - IF RULEFILE is included, then the merge rule is expected to be found in that file in a node called `kdl-merge`.
 - If RULEFILE is omitted, the merge rules is instead looked for in MERGEFILE in a slashdash:ed node called `/-kdl-merge`.
 - If NEWFILE is omitted, the merge result is written to stdout.
@@ -37,7 +37,7 @@ An original KDL document ORIGFILE is merged fith another KDL document MERGEFILE 
 ### Rules Definition
 Here is an example RULEFILE.
 - Contains an EDITION for specifying which edition of the kdl-merge spec the file adhedes to.
-- Contains RULES for how a merge should be have.
+- Contains RULES for how a merge should behave.
 - Contains optional ASSERTS for proving that the rules work as intended.
 
 ```kdl
