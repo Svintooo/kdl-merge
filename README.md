@@ -77,7 +77,7 @@ kdl-merge {
 
     // ASSERTS
     // Each assert node contains three node children: orig (ORIGFILE), merge (MERGEFILE), and new (NEWFILE).
-    // Assertion fails if "orig" merged with "merge" does not math "new" (the order of the resulting nodes is ignored).
+    // Assertion fails if "orig" merged with "merge" does not match "new" (the order of the resulting nodes is ignored).
     assert "all rules work as they should" {
         orig {
             example        "node"  that="is"    { not_modified; }
