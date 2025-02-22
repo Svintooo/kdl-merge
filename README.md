@@ -37,6 +37,47 @@ An original KDL document ORIGFILE is merged with another KDL document MERGEFILE 
 - If any of ORIGFILE, MERGEFILE, or RULEFILE, is `-` it is read from stdin (only one `-` is allowed).
 
 ### Rules Definition
+Syntax definition for RULEFILE (written in a made up BNF format):
+```
+RULE          : rule { node NODE_ACTION; [name NAME_ACTION;] [args ARGS_ACTION;] [props PROPS_ACTION;] [nodes NODES_ACTION;] [GUARDS] }
+
+NODE_ACTION   : "skip" | "create" | "delete" | "modify"
+NAME_ACTION   : "keep" | "overwrite"
+ARGS_ACTION   : "keep" | "overwrite" | "clear" | "append" | "prepend" | "subtract_one" | "subtract_all" | "union" | "intersect"
+PROPS_ACTION  : "keep" | "overwrite" | "clear" | "merge" | "subtract"
+NODES_ACTION  : "keep" | "overwrite" | "clear" | "merge"
+
+GUARDS        : GUARD; [GUARDS]
+GUARD         : IF_MATCH | IF_PATH | IF_HAS | IF_CONTAINS | IF_ARGS | IF_PROPS | IF_NODES
+IF_MATCH      : if_match ( "name" ["args"] ["props"] ["nodes"] | "args" ["props"] ["nodes"] | "props" ["nodes"] | "nodes" )
+IF_PATH       : if_path PATH
+IF_HAS        : if[_not]_(old|new|both)_has[_only]                                     ( "args" ["props"] ["nodes"] | "props" ["nodes"] | "nodes" )
+IF_CONTAINS   : if[_not]_(old|new|both)_contains_(all|any|exactly)                     ( ARGS [PROPS] [{ NODES }] | PROPS [{ NODES }] | { NODES } )
+IF_ARGS       : if[_not]_(old|new|both)_args_(contains_exactly|begins_with|ends_with)  ARGS
+IF_PROPS      : if[_not]_(old|new|both)_props_(contains_exactly|begins_with|ends_with) PROPS
+IF_NODES      : if[_not]_(old|new|both)_nodes_(contains_exactly|begins_with|ends_with) NODES
+
+ARGS          : ARG [ARGS]
+PROPS         : PROP [PROPS]
+NODES         : NODE ( ; | \n ) [NODES]
+PATH          : STRING_Q [PATH]
+
+ARG           : VALUE
+PROP          : KEY_NAME=VALUE
+NODE          : NODE_NAME [ARGS] [PROPS] [{ NODES }]
+
+NODE_NAME     : STRING_NO_Q
+KEY_NAME      : STRING_NO_Q
+VALUE         : STRING_Q | NUMBER | BOOLEAN | NULL
+
+STRING_NO_Q   : /^[^\s]*$/
+STRING_Q      : "/^([^"]|\")+$/" | #"/^([^#]|(?<!")#)*$/"#
+NUMBER        : /^[1-9][0-9]*[.]?[0-9]*$/ | 0x/^[0-9a-f]+$/ | #inf | #-inf | #nan
+BOOLEAN       : #true | #false
+NULL          : #null
+```
+
+### Ruels Example
 Here is an example RULEFILE.
 - Contains an EDITION for specifying which edition of the kdl-merge spec the file adhedes to.
 - Contains RULES for how a merge should behave.
@@ -57,22 +98,22 @@ kdl-merge {
     rule { node "modify"; args "overwrite"; props "overwrite"; nodes "overwrite"; if_match "name"; }
 
     // Delete rules. How to specify if a node shall be deleted, or if any of args/props/child nodes shall be cleared:
-    rule { node "delete";                if_match "name"; if_new_is_exactly         null;         }
-    rule { node "modify"; args  "clear"; if_match "name"; if_new_args_is_exactly    null null;    }
-    rule { node "modify"; props "clear"; if_match "name"; if_new_props_is_exactly   null=null;    }
-    rule { node "modify"; nodes "clear"; if_match "name"; if_new_nodes_is_exactly { null null; }; }
+    rule { node "delete";                if_match "name"; if_new_contains_exactly         #null;         }
+    rule { node "modify"; args  "clear"; if_match "name"; if_new_args_contains_exactly    #null #null;   }
+    rule { node "modify"; props "clear"; if_match "name"; if_new_props_contains_exactly   null=#null;    }
+    rule { node "modify"; nodes "clear"; if_match "name"; if_new_nodes_contains_exactly { null #null; }; }
 
-    rule { node "modify"; args "subtract"; if_match "name"; if_new_args_begins_with null; if_new_args_is_not_exactly null null; }
+    rule { node "modify"; args "subtract"; if_match "name"; if_new_args_begins_with #null; if_not_new_args_contains_exactly #null #null; }
 
     // Error rule. How to specify nodes that shall fail the whole merge operation if they exist in MERGEFILE:
     rule {
-        node "error" msg="Props containing null=null cannot contain any other key values."
-        if_match "name"; if_new_props_has null=null; if_new_props_is_not_exactly null=null
+        node "error" msg="Props containing null=#null cannot contain any other key values."
+        if_match "name"; if_new_props_has null=#null; if_not_new_props_contains_exactly null=#null
     } 
 
     // Merge rules. When node shall be kept and args/props should be merged separately:
-    rule { node "modify"; props "merge" { del_values null; }; if_match "name";        if_new_args_is_exactly "merge"; if_both_has "props"; if_both_has_no "nodes"; if_old_has_no "args"; }
-    rule { node "modify"; nodes "merge";                      if_match "name" "args";                                 if_both_has "nodes"; if_both_has_no "props";                       }
+    rule { node "modify"; props "merge" { delete_value #null; }; if_match "name";        if_new_args_contains_exactly "merge"; if_both_has "props"; if_both_has_no "nodes"; if_old_has_no "args"; }
+    rule { node "modify"; nodes "merge";                         if_match "name" "args";                                       if_both_has "nodes"; if_both_has_no "props";                       }
 
     // Misc rule. Match on something other than node name and overwrite name if a match is found:
     rule { node "modify"; name "overwrite"; args "overwrite"; props "overwrite"; if_path "binds"; if_match "nodes"; }
