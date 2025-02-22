@@ -77,7 +77,7 @@ BOOLEAN       : #true | #false
 NULL          : #null
 ```
 
-### Ruels Example
+### Rules Example
 Here is an example RULEFILE.
 - Contains an EDITION for specifying which edition of the kdl-merge spec the file adhedes to.
 - Contains RULES for how a merge should behave.
