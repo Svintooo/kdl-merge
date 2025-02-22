@@ -103,7 +103,7 @@ kdl-merge {
     rule { node "modify"; props "clear"; if_match "name"; if_new_props_contains_exactly   null=#null;    }
     rule { node "modify"; nodes "clear"; if_match "name"; if_new_nodes_contains_exactly { null #null; }; }
 
-    rule { node "modify"; args "subtract"; if_match "name"; if_new_args_begins_with #null; if_not_new_args_contains_exactly #null #null; }
+    rule { node "modify"; args "subtract_all"; if_match "name"; if_new_args_begins_with #null; if_not_new_args_contains_exactly #null #null; }
 
     // Error rule. How to specify nodes that shall fail the whole merge operation if they exist in MERGEFILE:
     rule {
@@ -146,14 +146,14 @@ kdl-merge {
         merge {
             created   "arg"    key="value"     { child_node; }
             modified  "blarg"  krum="failure"  { different_child_node; }
-            deleted    null
+            deleted    #null
 
-            args_cleared    null null
-            props_cleared   null=null
-            nodes_cleared { null null; }
-            all_cleared     null null  null=null  { null null; }
+            args_cleared    null #null
+            props_cleared   null=#null
+            nodes_cleared { null #null; }
+            all_cleared     #null #null  null=#null  { null #null; }
             
-            args_subtract  null "b" "c" "e"
+            args_subtract  #null "b" "c" "e"
 
             props_merge  "merge"    key1=null key3=another_value
             nodes_merge             { new_child_node; }
